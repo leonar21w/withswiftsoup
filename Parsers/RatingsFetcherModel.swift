@@ -13,7 +13,7 @@ struct ProfessorRatings {
 	var overallRating: String
 	var reviewNum: Int
 }
-
+@MainActor
 class RatingsFetcherModel: HttpUtil, ObservableObject {
 	func getRatings(professorName: String, departmentCode: String, completion: @escaping (Result<ProfessorRatings?, Error>) -> Void) {
 		let baseUrl = "https://www.ratemyprofessors.com/search/professors/1967?q=\(professorName)"
