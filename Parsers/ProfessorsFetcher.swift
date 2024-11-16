@@ -87,7 +87,6 @@ class ProfessorsFetcher: HttpUtil, ObservableObject {
 			
 			let rows = try result[0].select("tr")
 			let pTable = buildProfessorTable(rows: rows, fullCourseCode: departmentCode + " " + courseCode)
-			print(pTable)
 			return pTable
 		} catch {
 			print("Error fetching or processing data: \(error)")

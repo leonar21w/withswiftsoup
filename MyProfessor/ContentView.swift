@@ -9,31 +9,21 @@ import SwiftUI
 
 struct ContentView: View {
 	
-	@StateObject var tryout = ProfessorsFetcher()
-	@StateObject var trythis = RatingsFetcherModel()
+	@State var depcode: String = "PHYS"
+	@State var cCode: String = "4A"
+	@State var termcode: String = "W2025"
+	@StateObject var vm = DataTunnelVM()
+	
+	@State var text: String = "test it"
 	var body: some View {
-		Text("test this shit")
+		Text(text)
 			.onTapGesture {
 				Task {
-					try await tryout.getTerms()
-					try await tryout.getProfessorData(departmentCode: "PHYS", courseCode: "4A", termCode: "W2025")
-					try await trythis.getRatings(professorName: "Eduardo Luna", departmentCode: "PHYS") { result in
-						switch result {
-							case .success(let ratings):
-								if let ratings = ratings {
-									print("Ratings fetched successfully: \(ratings)")
-								} else {
-									print("No ratings found for the professor.")
-								}
-							case .failure(let error):
-								print("Failed to fetch ratings: \(error.localizedDescription)")
-						}
-					}
+					try await print(vm.searchProfessorAndGetRatings(departmentCode: depcode, courseCode: cCode, termCode: termcode))
 				}
-				
 			}
+		
+		
 	}
 }
-#Preview {
-    ContentView()
-}
+

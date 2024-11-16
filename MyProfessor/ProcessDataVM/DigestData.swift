@@ -7,20 +7,26 @@
 
 import Foundation
 
+
 class DigestDataVM: ObservableObject {
 	
-	@Published var departmentCode: String = ""
-	@Published var courseCode: String = ""
-	@Published var termCode: String = ""
-	
-	
-	@Published var professorFetcher = ProfessorsFetcher()
 	@Published var ratings = RatingsFetcherModel()
 	
-	//MARK: make a function that will be called in the for each loop in view
-	
-	func searchProfessorRatings() async throws -> [Professor] {
-		try! await professorFetcher.getProfessorData(departmentCode: departmentCode, courseCode: courseCode, termCode: termCode)
+	func searchForRatings(professor: String, department: String) async throws -> ProfessorRatings? {
+		try await withCheckedThrowingContinuation { continuation in
+			ratings.getRatings(professorName: professor, departmentCode: department) { result in
+				switch result {
+				case .success(let ratings):
+					if let ratings = ratings {
+						continuation.resume(returning: ratings)
+					} else {
+						continuation.resume(returning: nil)
+					}
+				case .failure(let error):
+					continuation.resume(throwing: error)
+				}
+			}
+		}
 	}
-	
+
 }
