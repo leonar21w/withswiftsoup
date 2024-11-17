@@ -15,6 +15,9 @@ struct ContentView: View {
 
 	var body: some View {
 		
+		Searchpage()
+			.padding(.top, 20)
+		
 		Text("get physics 4a proffesors")
 			.padding(.top, 50)
 			.onTapGesture {
