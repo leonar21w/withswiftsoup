@@ -8,11 +8,26 @@
 import SwiftUI
 
 struct RecentSearchCells: View {
+	
+	//format this like the preview sample
+	@State var searchHistory: String
+	
+	
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+		Text(searchHistory)
+			.font(.footnote)
+			.fontWeight(.semibold)
+			.foregroundStyle(Color.gray)
+			.padding(10)
+			.background(background)
     }
+	
+	private var background: some View {
+		RoundedRectangle(cornerRadius: 20)
+			.fill(Color.gray.opacity(0.3))
+	}
 }
 
 #Preview {
-    RecentSearchCells()
+	RecentSearchCells(searchHistory: "Math 1A -2024 Fall")
 }
