@@ -33,7 +33,7 @@ class DataTunnelVM: ObservableObject {
 	}
 
 	
-	func searchProfessorAndGetRatings(departmentCode: String, courseCode: String, termCode: String) async throws -> [Professor] {
+	func searchProfessorAndGetRatings(departmentCode: String, courseCode: String, termCode: String) async throws {
 		professorData = try await professorFetcher.getProfessorData(departmentCode: departmentCode, courseCode: courseCode, termCode: termCode)
 		
 		await withTaskGroup(of: Void.self) { group in
@@ -51,7 +51,5 @@ class DataTunnelVM: ObservableObject {
 				}
 			}
 		}
-		
-		return professorData
 	}
 }
