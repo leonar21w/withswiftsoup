@@ -12,11 +12,13 @@ struct searchBar: View {
 	@Binding var userText: String
 	@Binding var toggleField: Bool
 	
+	@State var sampleText: String = "Ex. Math 1C"
+	
 	
 	
     var body: some View {
 		HStack {
-			TextField("", text: $userText)
+			TextField(sampleText, text: $userText)
 				.disableAutocorrection(true)
 				.onSubmit {
 					toggleField.toggle()
@@ -32,6 +34,7 @@ struct searchBar: View {
 		.padding(.vertical, 15)
 		.background(RoundedRectangle(cornerRadius: 25)
 			.fill(Color.gray.opacity(0.5)).shadow(radius: 10))
+		.shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
 		
     }
 }

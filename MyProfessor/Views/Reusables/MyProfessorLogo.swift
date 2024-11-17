@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Searchpage: View {
+struct MyProfessorLogo: View {
 	var body: some View {
 		ZStack{
 			HStack{
@@ -19,16 +19,15 @@ struct Searchpage: View {
 	private var myProfessorBox: some View {
 		ZStack(alignment: .center) {
 			myProfessorBoxContent
-				.offset(y: 19)
 			coloredDots
-				.offset(x: 35, y: 19)
+				.offset(x: 25)
 		}
 	}
 	
 	private var coloredDots: some View {
 		HStack{
 			Circle()
-				.foregroundStyle(Color(red: 0.76, green: 1, blue: 0.45))
+				.foregroundStyle(Color.customGreen)
 				.frame(width: 16, height: 16)
 			Circle()
 				.foregroundStyle(Color(red: 1, green: 0.74, blue: 0.35))
@@ -48,10 +47,13 @@ struct Searchpage: View {
 			.padding(5)
 	}
 
+}
 
+extension Color {
+	static let customGreen = Color(UIColor(red: 146/255, green: 199/255, blue: 114/255, alpha: 1.0))
 }
 
 
 #Preview {
-	Searchpage()
+	MyProfessorLogo()
 }

@@ -4,6 +4,7 @@
 //
 //  Created by Leonard on 11/5/24.
 //
+
 import Foundation
 import SwiftSoup
 
@@ -14,14 +15,35 @@ struct ProfessorRatings {
 	var reviewNum: Int
 }
 
+enum RatingsFetcherError: Error {
+	case invalidURL
+	case dataLoadingFailed
+	case htmlParsingFailed
+	case noResultsFound
 
-class RatingsFetcherModel: HttpUtil, ObservableObject {
+	var localizedDescription: String {
+		switch self {
+		case .invalidURL:
+			return "The URL provided is invalid."
+		case .dataLoadingFailed:
+			return "Failed to load data from the server."
+		case .htmlParsingFailed:
+			return "Unable to parse the HTML document."
+		case .noResultsFound:
+			return "No matching results found for the provided input."
+		}
+	}
+}
+@MainActor
+class RatingsFetcherModel: ObservableObject {
+	
 	func getRatings(professorName: String, departmentCode: String, completion: @escaping (Result<ProfessorRatings?, Error>) -> Void) {
 		let baseUrl = "https://www.ratemyprofessors.com/search/professors/1967?q=\(professorName)"
 		guard let url = URL(string: baseUrl) else {
-			completion(.failure(NSError(domain: "RatingsFetcherModel", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+			completion(.failure(RatingsFetcherError.invalidURL))
 			return
 		}
+
 		URLSession.shared.dataTask(with: url) { data, response, error in
 			if let error = error {
 				completion(.failure(error))
@@ -29,7 +51,7 @@ class RatingsFetcherModel: HttpUtil, ObservableObject {
 			}
 
 			guard let data = data, let html = String(data: data, encoding: .utf8) else {
-				completion(.failure(NSError(domain: "RatingsFetcherModel", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Failed to load data"])))
+				completion(.failure(RatingsFetcherError.dataLoadingFailed))
 				return
 			}
 
@@ -51,34 +73,45 @@ class RatingsFetcherModel: HttpUtil, ObservableObject {
 					}
 				}
 
-				completion(.success(bestMatch))
+				if let match = bestMatch {
+					completion(.success(match))
+				} else {
+					completion(.failure(RatingsFetcherError.noResultsFound))
+				}
 			} catch {
-				completion(.failure(error))
+				completion(.failure(RatingsFetcherError.htmlParsingFailed))
 			}
 		}.resume()
 	}
 
+
 	func matchDepartment(department: String, departmentCode: String) -> Bool {
 		return department.lowercased().contains(departmentCode.lowercased())
 	}
+
 	
 	func similarNames(name1: String, name2: String) -> Bool {
-		let name1Components = name1.split(separator: " ")
-		let name2Components = name2.split(separator: " ")
+		let normalized1 = name1.lowercased().replacingOccurrences(of: "-", with: " ")
+		let normalized2 = name2.lowercased().replacingOccurrences(of: "-", with: " ")
 
-		guard name1Components.count == 2, name2Components.count == 2 else { return false }
+		let name1Components = normalized1.split(separator: " ")
+		let name2Components = normalized2.split(separator: " ")
 
-		let (first1, last1) = (String(name1Components[0]), String(name1Components[1]))
-		let (first2, last2) = (String(name2Components[0]), String(name2Components[1]))
-
-		return (first1 == first2 && last1 == last2) || (first1 == last2 && last1 == first2)
+		
+		for part1 in name1Components {
+			if name2Components.contains(where: { $0 == part1 }) {
+				return true
+			}
+		}
+		return false
 	}
+
 
 	func buildRatings(card: Element) -> ProfessorRatings? {
 		do {
 			let ratingRow = try card.select("div[class^=CardNumRating_]")
 			guard ratingRow.count > 3 else { return nil }
-			
+
 			let reviewNumText = try ratingRow[3].text().replacingOccurrences(of: "ratings", with: "").trimmingCharacters(in: .whitespaces)
 			guard let reviewNum = Int(reviewNumText), reviewNum > 0 else { return nil }
 
@@ -98,10 +131,8 @@ class RatingsFetcherModel: HttpUtil, ObservableObject {
 			}
 
 			let overallRating = try ratingRow[2].text()
-
 			return ProfessorRatings(difficulty: difficulty, wouldTakeAgain: wouldTakeAgain, overallRating: overallRating, reviewNum: reviewNum)
 		} catch {
-			print("Error parsing card: \(error)")
 			return nil
 		}
 	}

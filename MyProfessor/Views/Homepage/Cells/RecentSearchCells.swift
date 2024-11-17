@@ -25,6 +25,7 @@ struct RecentSearchCells: View {
 	private var background: some View {
 		RoundedRectangle(cornerRadius: 20)
 			.fill(Color.gray.opacity(0.3))
+			.shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
 	}
 }
 
